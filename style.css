@@ -1,7 +1,8 @@
 :root {
-  --bg: #020617;
+  --bg: #0b1220;
+  --itembg: #ffffff0f;
   --card: #0f172a;
-  --border: rgba(255,255,255,0.15);
+  --border: rgba(255,255,255,0.1);
   --text: #e5e7eb;
   --muted: #94a3b8;
   --accent: #38bdf8;
@@ -18,7 +19,15 @@
 body {
   margin: 0;
   padding: 20px;
-  background: var(--bg);
+  background:
+  /* subtle dark halo from top */
+  radial-gradient(circle at top, 
+    #19294d2d 0%, 
+    #1c3dcf20 55%, 
+    #191c5b10 100%
+  ),
+  var(--bg);
+
   color: var(--text);
   font-family: var(--font);
   display: flex;
@@ -36,7 +45,10 @@ body {
 /* --- Card --- */
 
 .card {
-  background: var(--card);
+  background:
+        radial-gradient(circle at top left, rgba(56,189,248,0.3), transparent 75%),
+        radial-gradient(circle at bottom right, rgba(59,130,246,0.25), transparent 75%),
+        var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius);
   padding: var(--spacing);
@@ -96,7 +108,7 @@ label {
 
 input, select {
   padding: 8px;
-  background: #0b1220;
+  background: var(--itembg);
   border-radius: var(--radius);
   border: 1px solid var(--border);
   color: var(--text);
@@ -145,13 +157,13 @@ input[type="number"]::-webkit-inner-spin-button {
 .result-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 10px;
+  padding: 15px;
   display: flex;
   justify-content: space-between;
-  font-size: .95rem;
   align-items: center;
   color: var(--muted);
   font-size: .8rem;
+  font-weight: bold;
   text-transform: uppercase;
   letter-spacing: .05em;
 }
@@ -159,12 +171,6 @@ input[type="number"]::-webkit-inner-spin-button {
 .result-card[data-result="Average"] {
   border-color: var(--accent);
   color: var(--accent);
-}
-
-
-.result-card.invalid {
-  border-color: var(--danger);
-  color: var(--danger);
 }
 
 /* --- Validation Warning --- */
@@ -202,7 +208,7 @@ button {
 }
 
 button:hover {
-  background: rgba(225,225,225,0.2)
+  background: --var(--itembg);
 }
 
 footer p {
