@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Radiator-Check</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="card-inner">
+        <h1>
+          Radiator Check
+          <span class="badge">v1.0 2025</span>
+        </h1>
+        <p class="subtitle">
+          Lorem Ipsum.
+        </p>
+
+        <form id="calc-form" onsubmit="return false;">
+          <div class="inputs-grid">
+            <div class="field">
+              <label for="n1">Number 1</label>
+              <input id="n1" class="number-input" type="number" step="any" placeholder="e.g. 12.5" />
+            </div>
+            <div class="field">
+              <label for="n2">Number 2</label>
+              <input id="n2" class="number-input" type="number" step="any" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="n3">Number 3</label>
+              <input id="n3" class="number-input" type="number" step="any" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="n4">Number 4</label>
+              <input id="n4" class="number-input" type="number" step="any" placeholder="Optional" />
+            </div>
+            <div class="field">
+              <label for="n5">Number 5</label>
+              <input id="n5" class="number-input" type="number" step="any" placeholder="Optional" />
+            </div>
+          </div>
+
+          <div class="control-row">
+            <div class="field">
+              <label for="operation">Radiator Type</label>
+              <select id="operation">
+                <option value="sum">Colum</option>
+                <option value="average">Flat</option>
+              </select>
+            </div>
+
+            <div class="actions">
+              <button type="button" class="btn-primary" id="calculate">
+                <span class="icon">＝</span>
+                <span>Calculate</span>
+              </button>
+              <span class="hint">Updates automatically as you type.</span>
+            </div>
+          </div>
+        </form>
+
+        <div class="result-card" id="result-card">
+          <div class="result-label">
+            <span>Arbona</span>
+            <small id="result-detail">&nbsp;</small>
+          </div>
+          <output id="result">—</output>
+        </div>
+        <div class="result-card" id="result-card">
+          <div class="result-label">
+            <span>Zender</span>
+            <small id="result-detail">&nbsp;</small>
+          </div>
+          <output id="result">—</output>
+        </div>
+        <div class="result-card" id="result-card">
+          <div class="result-label">
+            <span>Average</span>
+            <small id="result-detail">&nbsp;</small>
+          </div>
+          <output id="result">—</output>
+        </div>
+      </div>
+  
+    </div>
+  </div>
+  <script src="scripts.js"></script>
+</body>
+</html>
