@@ -4,7 +4,7 @@
   --card: #0f172a;
   --border: rgba(255,255,255,0.1);
   --text: #e5e7eb;
-  --muted: #94a3b8;
+  --muted: #a9bad3ff;
   --accent: #38bdf8;
   --danger: #fb7185;
 
@@ -18,9 +18,8 @@
 
 body {
   margin: 0;
-  padding: 20px;
+  padding: 32px;
   background:
-  /* subtle dark halo from top */
   radial-gradient(circle at top, 
     #19294d2d 0%, 
     #1c3dcf20 55%, 
@@ -107,7 +106,7 @@ label {
 }
 
 input, select {
-  padding: 8px;
+  padding: 8px 16px;
   background: var(--itembg);
   border-radius: var(--radius);
   border: 1px solid var(--border);
@@ -122,7 +121,6 @@ select {
   padding-right: 26px;
   cursor: pointer;
   color: var(--muted);
-
   background-image:
     linear-gradient(45deg, transparent 50%, var(--muted) 50%),
     linear-gradient(135deg, var(--muted) 50%, transparent 50%);
@@ -157,7 +155,7 @@ input[type="number"]::-webkit-inner-spin-button {
 .result-card {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 15px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -198,8 +196,7 @@ footer {
 
 button {
   all: unset;
-  cursor: pointer;
-  padding: 10px 18px;
+  padding: 8px 16px;
   margin: 8px, 12px;
   border-radius: var(--radius);
   font-size: .85rem;
@@ -208,7 +205,7 @@ button {
 }
 
 button:hover {
-  background: --var(--itembg);
+  background: var(--itembg);
 }
 
 footer p {
@@ -222,6 +219,23 @@ footer p {
 a {
   color: var(--muted);
   text-decoration: underline;
+}
+
+/* --- Rendering ---*/
+.render-card {
+  padding: 0;
+}
+
+.viewer-container {
+  width: 100%;
+  height: 200px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+canvas#radiator-viewer {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* --- Responsive --- */

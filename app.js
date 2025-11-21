@@ -1,3 +1,5 @@
+import { initRadiatorViewer, updateRadiator } from "./geometry.js";
+
 const UI_SCHEMA=[
   {
     card:"main",
@@ -13,6 +15,10 @@ const UI_SCHEMA=[
       {label:"validationColumns",validate:"columns"},
       {label:"validationColumnsRange",validate:"columnsRange"}
     ]
+  },
+  {
+    card:"render",
+    renderer: true
   },
   {
     card:"temperature",
@@ -150,12 +156,8 @@ const TEMPLATES={
   template3:{tFlow:50,tReturn:40,tRoom:22},
 }
 
-const radiatorOutput = ({height, length, depth, columns, links, tFlow, tReturn, tRoom, models}) => {
-
-  if (!VALIDATIONS.links({length,links}) || !VALIDATIONS.columns({columns,depth})){
-     
-    return null
-  }
+function infer(values) {
+  let { length, depth, links, columns } = values;
 
   fieldRefs.links.placeholder = ""
   if (!links && length) links = fieldRefs.links.placeholder = Math.round(length/45) 
@@ -164,6 +166,16 @@ const radiatorOutput = ({height, length, depth, columns, links, tFlow, tReturn, 
   if (!columns && depth) columns = fieldRefs.columns.placeholder = [
       [70,2],[110,3],[150,4],[200,5],[250,6]
     ].find(([max])=>depth<max)?.[1] ?? ""
+
+  return { ...values, links, columns };
+}
+
+
+const radiatorOutput = ({height, length, depth, columns, links, tFlow, tReturn, tRoom, models}) => {
+
+  if (!VALIDATIONS.links({length,links}) || !VALIDATIONS.columns({columns,depth})){
+    return null
+  }
 
   const [m,e] = [
     models[columns],
@@ -182,8 +194,6 @@ const radiatorOutput = ({height, length, depth, columns, links, tFlow, tReturn, 
 
   return (links || 1) * m * (d / 49.8) ** e
 }
-
-
 
 const CALCULATIONS={
   Average: v => radiatorOutput({ 
@@ -221,7 +231,7 @@ const CALCULATIONS={
     models: {
       2: 0.0690 * v.height + 1.5026,
       3: 0.0912 * v.height + 5.4758,
-      4: 0.1145 * v.height + 09.7000,
+      4: 0.1145 * v.height + 9.7000,
       5: 0.1383 * v.height + 12.1410,
       6: 0.1621 * v.height + 14.6090,
     }
@@ -251,14 +261,14 @@ const CALCULATIONS={
 }
 
 const VALIDATIONS={
-  links:({length,links})=>{
-    if (!length || !links) return true
+  links:({length, links})=>{
+    if (!length || !links) return true;
 
-    return links>length/45*0.85 && links<length/45*1.15
+    return links >= Math.round(length/45*0.85) && links <= Math.round(length/45*1.15)
   },
 
   columns:({columns,depth})=>{
-    if (!columns || !depth) return true
+    if (!columns || !depth) return true;
     
     const rules = {
       2: { min: 0, max: 70 },
@@ -316,6 +326,11 @@ function render(){
     }
 
     if(section.subtitle) card.innerHTML+=`<p class="subtitle" data-i18n="${section.subtitle}"></p>`
+
+    if(section.renderer){
+      card.className = "card render-card";
+      card.innerHTML = `<div class="viewer-container"><canvas id="radiator-viewer"></canvas></div>`;
+    }
 
     if(section.rows){
       section.rows.forEach(row=>{
@@ -391,7 +406,13 @@ function render(){
 
         footer.appendChild(b)
       })
-      footer.innerHTML+=`<p class="subtitle" data-i18n-html="true" data-i18n="${section.footer.note}"></p>`
+
+      const note = document.createElement("p")
+      note.className = "subtitle"
+      note.dataset.i18n = section.footer.note
+      note.dataset.i18nHtml = true
+      footer.appendChild(note)
+
       card.appendChild(footer)
     }
 
@@ -426,8 +447,13 @@ function runValidation(values){
 }
 
 function calculate(){
-  const values=Object.fromEntries(Object.entries(fieldRefs).map(([key,input])=>[key,parseFloat(input.value)]))
+  const values=infer(Object.fromEntries(Object.entries(fieldRefs).map(([key,input])=>[key,parseFloat(input.value)])))
   runValidation(values)
+  updateRadiator({
+        height: (values.height)/1000 || 0.8,
+        columns: values.columns || 3,
+        links: values.links || 1,
+      });
   document.querySelectorAll("output[data-result]").forEach(out=>{
     const key=out.dataset.result
     out.textContent=CALCULATIONS[key]?runFormula(CALCULATIONS[key],values)+" W":"—"
@@ -459,7 +485,9 @@ const spacerNode=()=>{
   return d
 }
 
+
 render()
+initRadiatorViewer();
 const select = document.querySelector("[data-template]")
 if (select) {
   select.value = "template1"
