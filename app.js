@@ -32,7 +32,15 @@ const UI_SCHEMA=[
   },
   {
     card:"results",
-    results:["Average","Arbonia","Zender","IRSAP","Cordivari","FIR Iron"],
+    results:[
+      {label:"Average", unit:" W"},
+      {label:"Arbonia", unit:" W"},
+      {label:"Zender", unit:" W"},
+      {label:"IRSAP", unit:" W"},
+      {label:"Cordivari", unit:" W"},
+      {label:"FIR Iron", unit:" W"},
+      {label:"Emissions", unit:" kg CO2-eq"},
+      ],
     footer:{
       buttons:[
         {label: "about", url: "https://www.hslu.ch/de-ch/hochschule-luzern/forschung/projekte/detail/?pid=7067"}, 
@@ -52,7 +60,7 @@ const translations = {
   badge:"v1.0 2025",
 
   en:{
-    subtitle:"Currently works for Column Radiators",
+    subtitle:"Currently works for column radiators. All information provided without guarantee.",
     height:"Height [mm]",
     depth:"Depth [mm]",
     length:"Length [mm]",
@@ -71,7 +79,8 @@ const translations = {
     validationLinksBound:"⚠ Value too big",
     validationHeightBound:"⚠ Value too big",
     validationDepthBound:"⚠ Value too big",
-    Average:"Average",
+    Average:"Output (Average)",
+    Emissions: "Emissions",
     excel:"Download Excel",
     about:"About",
     github:"Github",
@@ -80,7 +89,7 @@ const translations = {
   },
 
   de:{
-    subtitle:"Funktioniert derzeit für Gliedradiatoren",
+    subtitle:"Funktioniert derzeit für Gliedradiatoren. Alle Angaben ohne Gewähr.",
     height:"Höhe [mm]",
     depth:"Tiefe [mm]",
     length:"Länge [mm]",
@@ -99,7 +108,8 @@ const translations = {
     validationLinksBound:"⚠ Wert zu gross",
     validationHeightBound:"⚠ Wert zu gross",
     validationDepthBound:"⚠ Wert zu gross",
-    Average:"Durchschnitt",
+    Average:"Leistung (Durchschnitt)",
+    Emissions: "Emissionen",
     excel:"Excel herunterladen",
     about:"Info",
     github:"Github",
@@ -108,7 +118,7 @@ const translations = {
   },
 
   fr:{
-    subtitle:"Actuellement compatible avec les radiateurs à colonnes",
+    subtitle:"Fonctionne actuellement avec des radiateurs à colonnes. Toutes les informations sont fournies sans garantie.",
     height:"Hauteur [mm]",
     depth:"Profondeur [mm]",
     length:"Longueur [mm]",
@@ -127,7 +137,8 @@ const translations = {
     validationLinksBound:"⚠ Valeur trop élevée",
     validationHeightBound:"⚠ Valeur trop élevée",
     validationDepthBound:"⚠ Valeur trop élevée",
-    Average:"Moyenne",
+    Average:"Puissance (Moyenne)",
+    Emissions: "Émissions",
     excel:"Télécharger Excel",
     about:"À propos",
     github:"Github",
@@ -136,7 +147,7 @@ const translations = {
   },
 
   it:{
-    subtitle:"Attualmente funziona per radiatori a colonne",
+    subtitle:"Funziona attualmente con radiatori a colonne. Tutte le informazioni sono fornite senza garanzia.",
     height:"Altezza [mm]",
     depth:"Profondità [mm]",
     length:"Lunghezza [mm]",
@@ -155,7 +166,8 @@ const translations = {
     validationLinksBound:"⚠ Valore troppo grande",
     validationHeightBound:"⚠ Valore troppo grande",
     validationDepthBound:"⚠ Valore troppo grande",
-    Average:"Media",
+    Average:"Potenza (Media)",
+    Emissions: "Emissioni",
     excel:"Scarica Excel",
     about:"Informazioni",
     github:"Github",
@@ -274,7 +286,17 @@ const CALCULATIONS={
       5: 0.1458 * v.height + 13.8780,
       6: 0.1730 * v.height + 16.8890,
     }
-   })
+   }),
+   "Emissions": v => {
+    const models = {
+      2: 0.0016 * v.height + 0.0569,
+      3: 0.0024 * v.height + 0.0988,
+      4: 0.0032 * v.height + 0.1482,
+      5: 0.0040 * v.height + 0.1919,
+      6: 0.0048 * v.height + 0.2597,
+    };
+    return (v.links || 1) * models[v.columns] ?? null;
+   },
 }
 
 const VALIDATIONS={
@@ -403,10 +425,11 @@ function render(){
         if(isSpacer(item)){div.appendChild(spacerNode());return}
         const r=document.createElement("div")
         r.className="result-card"
-        r.dataset.result=item
+        r.dataset.result=item.label
+        r.dataset.unit=item.unit
         r.innerHTML=`
-          <div class="result-label" data-i18n="${item}"></div>
-          <output data-result="${item}">—</output>
+          <div class="result-label" data-i18n="${item.label}"></div>
+          <output data-result="${item.label}">—</output>
         `
         div.appendChild(r)
       })
@@ -517,12 +540,15 @@ function clearResults() {
 
 function updateResults(values) {
   document.querySelectorAll("output[data-result]").forEach(out => {
-    const key = out.dataset.result
-    out.textContent = CALCULATIONS[key]
-      ? runFormula(CALCULATIONS[key], values) + " W"
-      : "—"
+    const key = out.dataset.result;
+    const unit = out.closest(".result-card").dataset.unit || "";
+
+    const value = CALCULATIONS[key] ? runFormula(CALCULATIONS[key], values) : "—";
+
+    out.textContent = value === "—" ? "—" : `${value}${unit}`;
   })
 }
+
 
 function applyTranslations(){
   document.querySelectorAll("[data-i18n]").forEach(el=>{

@@ -162,13 +162,14 @@ input[type="number"]::-webkit-inner-spin-button {
   color: var(--muted);
   font-size: .8rem;
   font-weight: bold;
-  text-transform: uppercase;
   letter-spacing: .05em;
 }
 
-.result-card[data-result="Average"] {
+.result-card[data-result="Average"],
+.result-card[data-result="Emissions"]{
   border-color: var(--accent);
   color: var(--accent);
+  text-transform: uppercase;
 }
 
 /* --- Validation Warning --- */
