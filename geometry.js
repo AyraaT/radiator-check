@@ -6,9 +6,9 @@ import { mergeGeometries} from "https://esm.sh/three@0.181.2/examples/jsm/utils/
 let scene, camera, renderer, controls, model;
 
 function createRadiator({height = 0.8, columns = 3, links = 1}) {
-  const tubeDiameter = 0.045;
+  const tubeDiameter = 0.025;
   const tubeGap = 0.02;
-  const sectionGap = 0.04;
+  const sectionGap = 0.02;
   const color = 0xffffff;
   const group = new THREE.Group();
 
@@ -20,8 +20,7 @@ function createRadiator({height = 0.8, columns = 3, links = 1}) {
     opacity: 1,
   });
 
-  const secWidth = tubeDiameter + tubeGap;
-  const totalW  = links * secWidth + (links  - 1) * sectionGap;
+  const totalW  = links * tubeDiameter + (links  - 1) * sectionGap;
   const totalD  = columns * tubeDiameter + (columns - 1) * tubeGap;
   const headerH = tubeDiameter * 0.5;
   const tubeH   = height - headerH * 2;
@@ -37,21 +36,21 @@ function createRadiator({height = 0.8, columns = 3, links = 1}) {
   const parts = [];
 
   for (let s = 0; s < links; s++) {
-    const x = x0 + s * (secWidth + sectionGap);
+    const x = x0 + s * (tubeDiameter + sectionGap);
 
     for (let c = 0; c < columns; c++) {
       const y = y0 + c * (tubeDiameter + tubeGap) + tubeDiameter / 2;
 
       const geo = tubeGeo.clone();
       geo.rotateX(Math.PI / 2);
-      geo.translate(x + secWidth / 2, y, headerH + tubeH / 2);
+      geo.translate(x + tubeDiameter / 2, y, headerH + tubeH / 2);
 
       parts.push(geo);
     }
 
     const bottomCap = headerGeo.clone();
     bottomCap.scale(1, 1, 1.4);
-    bottomCap.translate(x + secWidth / 2, 0, headerH / 2);
+    bottomCap.translate(x + tubeDiameter / 2, 0, headerH / 2);
 
     parts.push(bottomCap);
 
