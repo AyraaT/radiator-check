@@ -45,7 +45,7 @@ const UI_SCHEMA=[
 ]
 
 const LANG_KEY="app-language"
-let lang=localStorage.getItem(LANG_KEY)||"de"
+let lang = localStorage.getItem(LANG_KEY) || (["de","en","fr","it"].includes((navigator.language||"").slice(0,2)) ? navigator.language.slice(0,2) : "de");
 
 const translations = {
   title:"Radiator Check",
@@ -314,7 +314,7 @@ const VALIDATIONS={
   linksBound:({links})=>{
     return !links || (links <= 400)
   },
-  
+
   depthBound:({depth})=>{
     return !depth || (depth <= 250)
   },
