@@ -274,8 +274,6 @@ const CALCULATIONS={
       5: 0.1410 * v.height + 17.6470,
       6: 0.1544 * v.height + 31.8940,
     }
-
-
    }),
    "FIR Iron": v => radiatorOutput({ 
     ...v, 
@@ -287,7 +285,7 @@ const CALCULATIONS={
       6: 0.1730 * v.height + 16.8890,
     }
    }),
-   "Emissions": v => {
+   Emissions: v => {
     const models = {
       2: 0.0016 * v.height + 0.0569,
       3: 0.0024 * v.height + 0.0988,
