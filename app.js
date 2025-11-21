@@ -15,7 +15,8 @@ const UI_SCHEMA=[
       {label:"validationLinksBound",validate:"linksBound"},
       ["depth","columns"],
       {label:"validationColumns",validate:"columns"},
-      {label:"validationColumnsBound",validate:"columnsBound"}
+      {label:"validationColumnsBound",validate:"columnsBound"},
+      {label:"validationDepthBound",validate:"depthBound"}
     ]
   },
   {
@@ -69,6 +70,7 @@ const translations = {
     validationLinks:"⚠ Length does not match links count.",
     validationLinksBound:"⚠ Value too big",
     validationHeightBound:"⚠ Value too big",
+    validationDepthBound:"⚠ Value too big",
     Average:"Average",
     excel:"Download Excel",
     about:"About",
@@ -96,6 +98,7 @@ const translations = {
     validationLinks:"⚠ Länge passt nicht zur Gliederanzahl.",
     validationLinksBound:"⚠ Wert zu gross",
     validationHeightBound:"⚠ Wert zu gross",
+    validationDepthBound:"⚠ Wert zu gross",
     Average:"Durchschnitt",
     excel:"Excel herunterladen",
     about:"Info",
@@ -123,6 +126,7 @@ const translations = {
     validationLinks:"⚠ La longueur ne correspond pas au nombre d’éléments.",
     validationLinksBound:"⚠ Valeur trop élevée",
     validationHeightBound:"⚠ Valeur trop élevée",
+    validationDepthBound:"⚠ Valeur trop élevée",
     Average:"Moyenne",
     excel:"Télécharger Excel",
     about:"À propos",
@@ -150,6 +154,7 @@ const translations = {
     validationLinks:"⚠ La lunghezza non coincide con il numero di elementi.",
     validationLinksBound:"⚠ Valore troppo grande",
     validationHeightBound:"⚠ Valore troppo grande",
+    validationDepthBound:"⚠ Valore troppo grande",
     Average:"Media",
     excel:"Scarica Excel",
     about:"Informazioni",
@@ -294,7 +299,7 @@ const VALIDATIONS={
     
     if (!r) return false
 
-    return depth >= r.min && depth < r.max;
+    return depth >= r.min && depth <= r.max;
 
   },
 
@@ -308,7 +313,11 @@ const VALIDATIONS={
 
   linksBound:({links})=>{
     return !links || (links <= 400)
-  }
+  },
+  
+  depthBound:({depth})=>{
+    return !depth || (depth <= 250)
+  },
 }
 
 const runFormula=(f,v)=>{
@@ -478,11 +487,11 @@ function runValidation(values) {
 }
 
 function calculate() {
-  const values = infer(
-    Object.fromEntries(
+  let values = Object.fromEntries(
       Object.entries(fieldRefs).map(([key, input]) => [key, parseFloat(input.value)])
     )
-  )
+  
+  values = infer(values)
 
   const { valid } = runValidation(values)
 
