@@ -118,10 +118,6 @@ function animate() {
 
 export function updateRadiator(params) {
   if (!scene) return;
-
-  const { height = 0, columns = 0, links = 0 } = params;
-
-  if (height > 3 || columns > 10 || links > 400) return;
   
   if (model) scene.remove(model);
 

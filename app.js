@@ -9,11 +9,13 @@ const UI_SCHEMA=[
     rows:[
       {},
       ["height",],
+      {label:"validationHeightBound",validate:"heightBound"},
       ["length","links"],
       {label:"validationLinks",validate:"links"},
+      {label:"validationLinksBound",validate:"linksBound"},
       ["depth","columns"],
       {label:"validationColumns",validate:"columns"},
-      {label:"validationColumnsRange",validate:"columnsRange"}
+      {label:"validationColumnsBound",validate:"columnsBound"}
     ]
   },
   {
@@ -63,8 +65,10 @@ const translations = {
     tReturn:"Return [°C]",
     tRoom:"Room [°C]",
     validationColumns:"⚠ Depth does not match column count.",
-    validationColumnsRange:"⚠ Only models between 2 and 6 columns are supported",
+    validationColumnsBound:"⚠ Only models between 2 and 6 columns are supported",
     validationLinks:"⚠ Length does not match links count.",
+    validationLinksBound:"⚠ Value too big",
+    validationHeightBound:"⚠ Value too big",
     Average:"Average",
     excel:"Download Excel",
     about:"About",
@@ -88,8 +92,10 @@ const translations = {
     tReturn:"Rücklauf [°C]",
     tRoom:"Raum [°C]",
     validationColumns:"⚠ Tiefe passt nicht zur Säulenanzahl.",
-    validationColumnsRange:"⚠ Nur Modelle mit 2 bis 6 Säulen werden unterstützt.",
+    validationColumnsBound:"⚠ Nur Modelle mit 2 bis 6 Säulen werden unterstützt.",
     validationLinks:"⚠ Länge passt nicht zur Gliederanzahl.",
+    validationLinksBound:"⚠ Wert zu gross",
+    validationHeightBound:"⚠ Wert zu gross",
     Average:"Durchschnitt",
     excel:"Excel herunterladen",
     about:"Info",
@@ -113,8 +119,10 @@ const translations = {
     tReturn:"Retour [°C]",
     tRoom:"Ambiante [°C]",
     validationColumns:"⚠ La profondeur ne correspond pas au nombre de colonnes.",
-    validationColumnsRange:"⚠ Seuls les modèles de 2 à 6 colonnes sont pris en charge.",
+    validationColumnsBound:"⚠ Seuls les modèles de 2 à 6 colonnes sont pris en charge.",
     validationLinks:"⚠ La longueur ne correspond pas au nombre d’éléments.",
+    validationLinksBound:"⚠ Valeur trop élevée",
+    validationHeightBound:"⚠ Valeur trop élevée",
     Average:"Moyenne",
     excel:"Télécharger Excel",
     about:"À propos",
@@ -138,8 +146,10 @@ const translations = {
     tReturn:"Ritorno [°C]",
     tRoom:"Ambiente [°C]",
     validationColumns:"⚠ La profondità non coincide con il numero di colonne.",
-    validationColumnsRange:"⚠ Sono supportati solo modelli da 2 a 6 colonne.",
+    validationColumnsBound:"⚠ Sono supportati solo modelli da 2 a 6 colonne.",
     validationLinks:"⚠ La lunghezza non coincide con il numero di elementi.",
+    validationLinksBound:"⚠ Valore troppo grande",
+    validationHeightBound:"⚠ Valore troppo grande",
     Average:"Media",
     excel:"Scarica Excel",
     about:"Informazioni",
@@ -148,7 +158,6 @@ const translations = {
     Finanziato da <a href="https://cbi-booster.ch/">CBI Booster</a> e <a href="https://baselcircular.ch/">Basel Circular</a>.`
   }
 }
-
 
 const TEMPLATES={
   template1:{tFlow:75,tReturn:65,tRoom:20},
@@ -160,12 +169,15 @@ function infer(values) {
   let { length, depth, links, columns } = values;
 
   fieldRefs.links.placeholder = ""
+  fieldRefs.length.placeholder = ""
+
   if (!links && length) links = fieldRefs.links.placeholder = Math.round(length/45) 
-  
+  if (!length && links) fieldRefs.length.placeholder = links*45
+
     fieldRefs.columns.placeholder = ""
   if (!columns && depth) columns = fieldRefs.columns.placeholder = [
       [70,2],[110,3],[150,4],[200,5],[250,6]
-    ].find(([max])=>depth<max)?.[1] ?? ""
+    ].find(([max])=>depth<=max)?.[1] ?? ""
 
   return { ...values, links, columns };
 }
@@ -282,12 +294,20 @@ const VALIDATIONS={
     
     if (!r) return false
 
-    return r ? depth>=r.min && depth<=r.max : false
+    return depth >= r.min && depth < r.max;
 
   },
 
-  columnsRange:({columns})=>{
-    if (columns < 2 || columns > 6) return false
+  columnsBound:({columns})=>{
+    return !columns || (columns >= 2 && columns <= 6)
+  },
+
+  heightBound:({height})=>{
+    return !height || (height <= 3000)
+  },
+
+  linksBound:({links})=>{
+    return !links || (links <= 400)
   }
 }
 
@@ -439,24 +459,59 @@ function handleInput(key){
   calculate()
 }
 
-function runValidation(values){
-  Object.entries(validationRefs).forEach(([rule,rowEl])=>{
-    const valid=VALIDATIONS[rule](values)
-    rowEl.style.display = valid===false ? "block" : "none"
+function runValidation(values) {
+  const result = {
+    valid: true,
+    errors: {}
+  }
+
+  for (const [rule, rowEl] of Object.entries(validationRefs)) {
+    const ok = VALIDATIONS[rule](values)
+
+    result.errors[rule] = !ok
+    if (!ok) result.valid = false
+
+    rowEl.style.display = ok ? "none" : "block"
+  }
+
+  return result
+}
+
+function calculate() {
+  const values = infer(
+    Object.fromEntries(
+      Object.entries(fieldRefs).map(([key, input]) => [key, parseFloat(input.value)])
+    )
+  )
+
+  const { valid } = runValidation(values)
+
+  if (!valid) {
+    clearResults()
+    return
+  }
+
+  updateRadiator({
+    height: values.height / 1000 || 0.8,
+    columns: values.columns || 3,
+    links: values.links || 1,
+  })
+
+  updateResults(values)
+}
+
+function clearResults() {
+  document.querySelectorAll("output[data-result]").forEach(out => {
+    out.textContent = "—"
   })
 }
 
-function calculate(){
-  const values=infer(Object.fromEntries(Object.entries(fieldRefs).map(([key,input])=>[key,parseFloat(input.value)])))
-  runValidation(values)
-  updateRadiator({
-        height: (values.height)/1000 || 0.8,
-        columns: values.columns || 3,
-        links: values.links || 1,
-      });
-  document.querySelectorAll("output[data-result]").forEach(out=>{
-    const key=out.dataset.result
-    out.textContent=CALCULATIONS[key]?runFormula(CALCULATIONS[key],values)+" W":"—"
+function updateResults(values) {
+  document.querySelectorAll("output[data-result]").forEach(out => {
+    const key = out.dataset.result
+    out.textContent = CALCULATIONS[key]
+      ? runFormula(CALCULATIONS[key], values) + " W"
+      : "—"
   })
 }
 
