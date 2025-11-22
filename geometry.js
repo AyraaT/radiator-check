@@ -122,12 +122,16 @@ export function updateRadiator(params) {
   if (model) scene.remove(model);
 
   model = createRadiator(params);
+
+  model.rotation.x = Math.PI / 2;
+  
   scene.add(model);
   centerObject(model);
   zoomToFit(model);
+
 }
 
-function zoomToFit(object, padding = 0.4, duration = 600) {
+function zoomToFit(object, duration = 600) {
   const box = new THREE.Box3().setFromObject(object);
   const sphere = new THREE.Sphere();
   box.getBoundingSphere(sphere);
@@ -137,9 +141,10 @@ function zoomToFit(object, padding = 0.4, duration = 600) {
   const aspect = renderer.domElement.clientWidth / renderer.domElement.clientHeight;
   const fov = camera.fov * (Math.PI / 180);
 
-  // Computes consistent distance based on both axes
   const distVert = radius / Math.sin(fov / 2);
   const distHorz = radius / Math.sin(Math.atan(Math.tan(fov / 2) * aspect));
+
+  const padding = 0.5 + 0.3 * Math.exp(-radius);  
 
   const distance = Math.max(distVert, distHorz) * padding;
 
