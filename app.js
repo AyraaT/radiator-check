@@ -45,7 +45,7 @@ const UI_SCHEMA=[
       buttons:[
         {label: "about", url: "https://www.hslu.ch/de-ch/hochschule-luzern/forschung/projekte/detail/?pid=7067"}, 
         {label: "github", url: "https://github.com/AyraaT/radiator-check"}, 
-        {label: "excel", url: "20251118_RadiatorCheck_Prototyp1.xlsx"}
+        {label: "excel", url: "20260121_RadiatorCheck_v1.xlsx"}
       ],
       note:"footer"
     }
