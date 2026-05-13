@@ -1,5 +1,9 @@
 .DS_Store
 Thumbs.db
+*.log
+coverage/
+build/
+dist/
 agent.md
 AGENTS.md
 **/AGENTS.md
